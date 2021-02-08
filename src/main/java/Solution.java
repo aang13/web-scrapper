@@ -3,49 +3,93 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.io.FileWriter;
 import java.io.IOException;
 
 import java.util.*;
 
+
 public class Solution {
-    public static void main(String[] args) throws IOException {
-        String url = "https://finance.yahoo.com/quote/%5EVIX/history?p=%5EVIX&guccounter=1&guce_referrer=aHR0cHM6Ly9tYWlsLmdvb2dsZS5jb20v&guce_referrer_sig=AQAAAKU5UXnZEhNK_s1k-l6fQ7l-jFaR2xghH5NOhaohsec-HThT1BaEsni-hUlysVCFWpzd4qa2OZ2YZtBDJNQqKw1Uh64_nppDI4RnzPnTgxDGta123-A_SbIBm4SA5B0xopHvDcl5A21esFvWceZnRJPk6ohtud7OGJpWcNLdADYT";
-        Document doc = Jsoup.connect(url).get();
+
+    private static final String TABLE_URL = "https://www.geeksforgeeks.org/null-pointer-exception-in-java/";
+
+    public static Elements scrapData(Elements rows, List<String> headers, List<Map<String, String>> listMap) {
+
+        WebDriver driver = new ChromeDriver();
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) driver;
+        if(TABLE_URL.isEmpty() || TABLE_URL==null){
+            System.out.println("The url is invalid");
+            return rows;
+        }
+        driver.get(TABLE_URL);
+
+        for (int i = 0; i < 200; i++)
+            javascriptExecutor.executeScript("window.scrollTo(0, 200000)");
+        
+        Document doc;
+
+        doc = Jsoup.parse(driver.getPageSource());
 
         Element table = doc.getElementById("mrt-node-Col1-1-HistoricalDataTable");
-        Elements rows=table.select("tr");
+        if(table==null){
+            System.out.println("No table found in the url");
+            return rows;
+        }
+        rows = table.select("tr");
 
-        Elements first=rows.get(0).select("th,td");
-        List<String>headers=new ArrayList<>();
+        Elements first = rows.get(0).select("th,td");
 
-        for(Element header:first)
+
+        for (Element header : first)
             headers.add(header.text());
 
 
-        List<Map<String,String>> listMap = new ArrayList<Map<String,String>>();
-        for(int row=1;row<rows.size()-1;row++) {
+        for (int row = 1; row < rows.size() - 1; row++) {
             Elements colVals = rows.get(row).select("th,td");
             int colCount = 0;
-            Map<String,String> tuple = new LinkedHashMap<String,String>();
-            for(Element colVal : colVals)
+            Map<String, String> tuple = new LinkedHashMap<String, String>();
+            for (Element colVal : colVals)
                 tuple.put(headers.get(colCount++), colVal.text());
             listMap.add(tuple);
         }
 
+        return rows;
+    }
 
-        CSVWriter writer=new CSVWriter((new FileWriter("CBOE.csv")));
+    public static void writeToCsv(Elements rows, List<String> headers, List<Map<String, String>> listMap) throws IOException {
+        CSVWriter writer;
+
+        if(rows==null) return;
+        if(listMap.size()==0) throw new RuntimeException("No Data Found");
+
+        writer = new CSVWriter((new FileWriter("CBOE.csv")));
+
         writer.writeNext(headers.toArray(new String[headers.size()]));
 
-        for(int row=1;row<rows.size()-1;row++) {
+        for (int row = 1; row < rows.size() - 1; row++) {
             int colCnt = headers.size();
-            List<String>rowString=new ArrayList<>();
-            for(int i=0;i<colCnt;i++)rowString.add(listMap.get(row).get(headers.get(i)));
+            List<String> rowString = new ArrayList<>();
+            for (int i = 0; i < colCnt; i++) rowString.add(listMap.get(row - 1).get(headers.get(i)));
             writer.writeNext(rowString.toArray(new String[headers.size()]));
         }
 
         writer.close();
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        Elements rows = null;
+        List<String> headers = new ArrayList<>();
+        List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
+
+        rows = scrapData(rows, headers, listMap);
+
+        writeToCsv(rows, headers, listMap);
     }
 
 }
