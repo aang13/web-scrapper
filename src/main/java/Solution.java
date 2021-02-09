@@ -16,7 +16,7 @@ import java.util.*;
 
 public class Solution {
 
-    private static final String TABLE_URL = "https://www.geeksforgeeks.org/null-pointer-exception-in-java/";
+    private static final String TABLE_URL = "https://finance.yahoo.com/quote/%5EVIX/history?p=%5EVIX&guccounter=1&guce_referrer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8&guce_referrer_sig=AQAAAIzRvFlrwMXO1vyJpHD8UM9tsxG_WblZ8NKzNLWU9F_J8tTcOtFpvVK_9beOydzvAHjylka9pUKpa3vituJp43Fo3aPtmrnY6sJSymiSzozrVxEN1ydTJOXV4jJqN6OuahVYr35vZE72vzUgX4HpAjvn3N3cam0TwlA-689nalDX";
 
     public static Elements scrapData(Elements rows, List<String> headers, List<Map<String, String>> listMap) {
 
