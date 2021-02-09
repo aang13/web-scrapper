@@ -13,5 +13,7 @@ Java web scrapper with:
 
 -Windows users with Chocolatey installed: choco install chromedriver
 
+The scrapped data is saved to a csv file. This has been done with openCsv.
+
 
 
